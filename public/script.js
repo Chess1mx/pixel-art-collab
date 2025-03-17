@@ -28,16 +28,17 @@ let pixels = new Array(GRID_WIDTH).fill(null)
     .map(() => new Array(GRID_HEIGHT).fill('#FFFFFF'));
 
 // Conexión WebSocket
-const socket = io(window.location.hostname === 'localhost' 
-    ? 'http://localhost:3000'
-    : 'https://pixel-art-collab.onrender.com');
+const socket = io();
 
 socket.on('connect', () => {
     console.log('Conectado al servidor');
+    // Solicitar el estado actual del canvas al conectar
+    socket.emit('requestCanvas');
 });
 
 socket.on('connect_error', (error) => {
     console.error('Error de conexión:', error);
+    alert('Error de conexión. Intentando reconectar...');
 });
 
 socket.on('pixelUpdate', (data) => {
@@ -51,11 +52,39 @@ socket.on('fullCanvas', (data) => {
 });
 
 // Funciones de dibujo
+function drawGrid() {
+    ctx.strokeStyle = '#EEEEEE';
+    ctx.lineWidth = 0.5;
+    
+    // Dibujar líneas verticales
+    for (let x = 0; x <= GRID_WIDTH; x++) {
+        ctx.beginPath();
+        ctx.moveTo(x * PIXEL_SIZE, 0);
+        ctx.lineTo(x * PIXEL_SIZE, CANVAS_HEIGHT);
+        ctx.stroke();
+    }
+    
+    // Dibujar líneas horizontales
+    for (let y = 0; y <= GRID_HEIGHT; y++) {
+        ctx.beginPath();
+        ctx.moveTo(0, y * PIXEL_SIZE);
+        ctx.lineTo(CANVAS_WIDTH, y * PIXEL_SIZE);
+        ctx.stroke();
+    }
+}
+
 function drawCanvas() {
     ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    
+    // Dibujar el grid primero
+    drawGrid();
+    
+    // Dibujar los píxeles
     for (let x = 0; x < GRID_WIDTH; x++) {
         for (let y = 0; y < GRID_HEIGHT; y++) {
-            drawPixel(x, y, pixels[x][y]);
+            if (pixels[x][y] !== '#FFFFFF') {
+                drawPixel(x, y, pixels[x][y]);
+            }
         }
     }
 }
@@ -63,8 +92,6 @@ function drawCanvas() {
 function drawPixel(x, y, color) {
     ctx.fillStyle = color;
     ctx.fillRect(x * PIXEL_SIZE, y * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE);
-    ctx.strokeStyle = '#CCCCCC';
-    ctx.strokeRect(x * PIXEL_SIZE, y * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE);
 }
 
 // Función para obtener coordenadas del pixel
@@ -233,12 +260,14 @@ document.addEventListener('gesturestart', (e) => {
 });
 
 // Inicialización
-drawCanvas();
-
-// Agregar evento para actualización inicial
 window.addEventListener('load', () => {
-    updateCanvasTransform();
     drawCanvas();
+    updateCanvasTransform();
+    
+    // Solicitar el estado actual del canvas
+    if (socket.connected) {
+        socket.emit('requestCanvas');
+    }
 });
 
 // Agregar evento para redimensionamiento de ventana
