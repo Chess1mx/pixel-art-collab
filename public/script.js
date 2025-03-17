@@ -28,7 +28,14 @@ let pixels = new Array(GRID_WIDTH).fill(null)
     .map(() => new Array(GRID_HEIGHT).fill('#FFFFFF'));
 
 // Conexión WebSocket
-const socket = io();
+const socket = io(window.location.hostname === 'localhost' 
+    ? 'http://localhost:3000'
+    : window.location.origin, {
+    reconnection: true,
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000,
+    transports: ['websocket', 'polling']
+});
 
 socket.on('connect', () => {
     console.log('Conectado al servidor');
@@ -38,7 +45,7 @@ socket.on('connect', () => {
 
 socket.on('connect_error', (error) => {
     console.error('Error de conexión:', error);
-    alert('Error de conexión. Intentando reconectar...');
+    console.log('Intentando reconectar...');
 });
 
 socket.on('pixelUpdate', (data) => {

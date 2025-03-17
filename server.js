@@ -1,12 +1,28 @@
 const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
-const io = require('socket.io')(http);
+const io = require('socket.io')(http, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"],
+        transports: ['websocket', 'polling'],
+        credentials: true
+    },
+    allowEIO3: true
+});
 const fs = require('fs');
 const path = require('path');
 
 // Servir archivos estáticos desde la carpeta public
 app.use(express.static('./public'));
+
+// Configurar CORS para Express
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    next();
+});
 
 // Matriz de píxeles del servidor
 const GRID_WIDTH = 100;
