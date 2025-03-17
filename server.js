@@ -12,6 +12,7 @@ const io = require('socket.io')(http, {
 });
 const fs = require('fs');
 const path = require('path');
+const { networkInterfaces } = require('os');
 
 // Servir archivos estáticos desde la carpeta public
 app.use(express.static('./public'));
@@ -23,6 +24,21 @@ app.use((req, res, next) => {
     res.header('Access-Control-Allow-Headers', 'Content-Type');
     next();
 });
+
+// Obtener la dirección IP local
+const nets = networkInterfaces();
+let localIP = '';
+
+for (const name of Object.keys(nets)) {
+    for (const net of nets[name]) {
+        // Saltar direcciones IPv6 y direcciones de loopback
+        if (net.family === 'IPv4' && !net.internal) {
+            localIP = net.address;
+            break;
+        }
+    }
+    if (localIP) break;
+}
 
 // Matriz de píxeles del servidor
 const GRID_WIDTH = 100;
@@ -102,4 +118,5 @@ app.get('/health', (req, res) => {
 const PORT = process.env.PORT || 3000;
 http.listen(PORT, '0.0.0.0', () => {
     console.log(`Servidor ejecutándose en el puerto ${PORT}`);
+    console.log(`Accede desde tu red local usando: http://${localIP}:${PORT}`);
 }); 

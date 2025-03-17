@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: pixel-art-collab
+    env: node
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_VERSION
+        value: 18.x
+    plan: free 
