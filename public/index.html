@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixelArt Colaborativo Global</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="tools">
+            <div class="color-picker">
+                <input type="color" id="colorPicker" value="#000000">
+                <span>Color seleccionado</span>
+            </div>
+            <div class="coordinates">
+                <span id="mouseCoords">Coordenadas: 0, 0</span>
+            </div>
+            <div class="controls">
+                <button id="zoomIn">+</button>
+                <button id="zoomOut">-</button>
+            </div>
+        </div>
+        <div class="canvas-container">
+            <canvas id="pixelCanvas"></canvas>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
+    <script src="script.js"></script>
+</body>
+</html> 
